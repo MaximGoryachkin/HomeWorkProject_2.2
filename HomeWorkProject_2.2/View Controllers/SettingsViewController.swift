@@ -25,34 +25,23 @@ class SettingsViewController: UIViewController {
     @IBOutlet weak var greenTextField: UITextField!
     @IBOutlet weak var blueTextField: UITextField!
     
+    // MARK: - Publick properties
     
     var color: UIColor!
     var delegate: SettingsViewControllerDelegate!
-    
-    let toolBar = UIToolbar()
     
     // MARK: - Override methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        colorView.backgroundColor = color
-        colorView.layer.cornerRadius = colorView.frame.height / 10
-        changingInterfaceProperties(with: color)
-        
-        redTextField.delegate = self
-        greenTextField.delegate = self
-        blueTextField.delegate = self
-        
+        initializatingView()
         keyboardBarSettings()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         view.endEditing(true)
-        redTextField.text = redValueLabel.text
-        greenTextField.text = greenValueLabel.text
-        blueTextField.text = blueValueLabel.text
+        getValueForTextFields()
     }
     
     // MARK: - IB Actions
@@ -76,22 +65,35 @@ class SettingsViewController: UIViewController {
         delegate.setNewColor(for: colorView.backgroundColor!)
         dismiss(animated: true)
     }
+    
+    // MARK - Private properties
+    
+    private let toolBar = UIToolbar()
+    
     // MARK: - Private methods
     
-    private func coloringView() {
-        colorView.backgroundColor = UIColor(
-            red: CGFloat(redSlider.value),
-            green: CGFloat(greenSlider.value),
-            blue: CGFloat(blueSlider.value),
-            alpha: 1)
+    private func initializatingView() {
+        colorView.backgroundColor = color
+        colorView.layer.cornerRadius = colorView.frame.height / 10
+        changingInterfaceProperties(with: color)
+        
+        redTextField.delegate = self
+        greenTextField.delegate = self
+        blueTextField.delegate = self
     }
     
-    private func string(from slider: UISlider) -> String {
-        String(format: "%.2f", slider.value)
-    }
-    
-    private func string(from slider: CGFloat) -> String {
-        String(format: "%.2f", slider)
+    private func changingInterfaceProperties(with color: UIColor) {
+        let colors = gettingColor(for: color)
+        
+        redSlider.value = Float(colors[0])
+        greenSlider.value = Float(colors[1])
+        blueSlider.value = Float(colors[2])
+        
+        redValueLabel.text = string(from: colors[0])
+        greenValueLabel.text = string(from: colors[1])
+        blueValueLabel.text = string(from: colors[2])
+        
+        getValueForTextFields()
     }
     
     private func gettingColor(for color: UIColor) -> [CGFloat] {
@@ -111,17 +113,33 @@ class SettingsViewController: UIViewController {
         return colors
     }
     
-    private func changingInterfaceProperties(with color: UIColor) {
-        let colors = gettingColor(for: color)
-        
-        redSlider.value = Float(colors[0])
-        greenSlider.value = Float(colors[1])
-        blueSlider.value = Float(colors[2])
-        
-        redValueLabel.text = string(from: colors[0])
-        greenValueLabel.text = string(from: colors[1])
-        blueValueLabel.text = string(from: colors[2])
-        
+    private func coloringView() {
+        colorView.backgroundColor = UIColor(
+            red: CGFloat(redSlider.value),
+            green: CGFloat(greenSlider.value),
+            blue: CGFloat(blueSlider.value),
+            alpha: 1)
+    }
+    
+    private func string(from slider: UISlider) -> String {
+        String(format: "%.2f", slider.value)
+    }
+    
+    private func string(from slider: CGFloat) -> String {
+        String(format: "%.2f", slider)
+    }
+    
+    private func getValue(for textField: UITextField) {
+        switch textField {
+        case redTextField:
+            textField.text = redValueLabel.text
+        case greenTextField:
+            textField.text = greenValueLabel.text
+        default:
+            textField.text = blueValueLabel.text
+        }
+    }
+    private func getValueForTextFields() {
         redTextField.text = redValueLabel.text
         greenTextField.text = greenValueLabel.text
         blueTextField.text = blueValueLabel.text
@@ -129,16 +147,24 @@ class SettingsViewController: UIViewController {
     
     private func keyboardBarSettings() {
         toolBar.sizeToFit()
-        let button = UIBarButtonItem(title: "Done", style: .done, target: self, action: .none)
-        toolBar.setItems([button], animated: true)
-        toolBar.isUserInteractionEnabled = true
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonPressed))
+        
+        toolBar.setItems([doneButton], animated: false)
+        
         redTextField.inputAccessoryView = toolBar
         greenTextField.inputAccessoryView = toolBar
         blueTextField.inputAccessoryView = toolBar
         
         coloringView()
     }
+    
+    @objc private func doneButtonPressed() {
+        view.endEditing(true)
+        getValueForTextFields()
+    }
 }
+
+// MARK: - Extentions
 
 extension SettingsViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -147,23 +173,43 @@ extension SettingsViewController: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         guard let text = textField.text else { return }
-        switch textField {
-        case redTextField:
-            guard let redValue = Float(text) else { return }
-            redSlider.value = redValue
-            redValueLabel.text = string(from: redSlider)
-        case greenTextField:
-            guard let greenValue = Float(text) else { return }
-            greenSlider.value = greenValue
-            greenValueLabel.text = string(from: greenSlider)
-        default:
-            guard let blueValue = Float(text) else { return }
-            blueSlider.value = blueValue
-            blueValueLabel.text = string(from: blueSlider)
+        if let number = Float(text) {
+            if number >= 0 && number <= 1 {
+                switch textField {
+                case redTextField:
+                    redSlider.setValue(number, animated: true)
+                    redValueLabel.text = string(from: redSlider)
+                    getValue(for: textField)
+                case greenTextField:
+                    greenSlider.setValue(number, animated: true)
+                    greenValueLabel.text = string(from: greenSlider)
+                    getValue(for: textField)
+                default:
+                    blueSlider.setValue(number, animated: true)
+                    blueValueLabel.text = string(from: blueSlider)
+                    getValue(for: textField)
+                }
+                coloringView()
+            } else {
+                showAlert(title: "Oops", massage: "Enter value from 0 to 1")
+            }
+        } else {
+            showAlert(title: "Oops", massage: "Enter numbers of type 0.00")
         }
-        coloringView()
+        //getValueForTextFields()
     }
 }
 
-
+extension SettingsViewController {
+    private func showAlert(title: String, massage: String) {
+        let alert = UIAlertController(title: title,
+                                      message: massage,
+                                      preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "OK", style: .cancel)
+        
+        alert.addAction(alertAction)
+        
+        present(alert, animated: true)
+    }
+}
 
