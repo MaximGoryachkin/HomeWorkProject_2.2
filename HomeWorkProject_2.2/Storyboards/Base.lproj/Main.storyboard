@@ -39,7 +39,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="Q0Q-pG-V4Z">
-                                <rect key="frame" x="16" y="225" width="288" height="162"/>
+                                <rect key="frame" x="16" y="220" width="288" height="162"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="Gaw-L6-INv">
                                         <rect key="frame" x="0.0" y="0.0" width="51" height="162"/>
@@ -175,7 +175,7 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="gmt-fr-QBZ" secondAttribute="trailing" constant="16" id="f3u-Mh-Svf"/>
                             <constraint firstItem="gmt-fr-QBZ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="hJ7-TO-cF7"/>
                             <constraint firstItem="xwL-Bd-BKs" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="oRo-IT-JJF"/>
-                            <constraint firstItem="Q0Q-pG-V4Z" firstAttribute="top" secondItem="gmt-fr-QBZ" secondAttribute="bottom" constant="40" id="rkr-yw-uNT"/>
+                            <constraint firstItem="Q0Q-pG-V4Z" firstAttribute="top" secondItem="gmt-fr-QBZ" secondAttribute="bottom" constant="35" id="rkr-yw-uNT"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="vOa-NM-YCx"/>

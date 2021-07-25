@@ -30,18 +30,22 @@ class SettingsViewController: UIViewController {
     var color: UIColor!
     var delegate: SettingsViewControllerDelegate!
     
+    // MARK: - Private properties
+    
+    private let toolBar = UIToolbar()
+    
     // MARK: - Override methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         initializatingView()
-        keyboardBarSettings()
+        addingKeyboardBar()
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>,
+                               with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         view.endEditing(true)
-        getValueForTextFields()
     }
     
     // MARK: - IB Actions
@@ -49,14 +53,14 @@ class SettingsViewController: UIViewController {
     @IBAction func coloringViewWithSlider(_ sender: UISlider) {
         switch sender {
         case redSlider:
-            redValueLabel.text = string(from: redSlider)
-            redTextField.text = redValueLabel.text
+            redValueLabel.text = string(from: sender)
+            redTextField.text = string(from: sender)
         case greenSlider:
-            greenValueLabel.text = string(from: greenSlider)
-            greenTextField.text = greenValueLabel.text
+            greenValueLabel.text = string(from: sender)
+            greenTextField.text = string(from: sender)
         default:
-            blueValueLabel.text = string(from: blueSlider)
-            blueTextField.text = blueValueLabel.text
+            blueValueLabel.text = string(from: sender)
+            blueTextField.text = string(from: sender)
         }
         coloringView()
     }
@@ -66,14 +70,9 @@ class SettingsViewController: UIViewController {
         dismiss(animated: true)
     }
     
-    // MARK - Private properties
-    
-    private let toolBar = UIToolbar()
-    
     // MARK: - Private methods
     
     private func initializatingView() {
-        colorView.backgroundColor = color
         colorView.layer.cornerRadius = colorView.frame.height / 10
         changingInterfaceProperties(with: color)
         
@@ -94,6 +93,8 @@ class SettingsViewController: UIViewController {
         blueValueLabel.text = string(from: colors[2])
         
         getValueForTextFields()
+        
+        coloringView()
     }
     
     private func gettingColor(for color: UIColor) -> [CGFloat] {
@@ -111,6 +112,12 @@ class SettingsViewController: UIViewController {
         colors.append(alpha)
         
         return colors
+    }
+    
+    private func getValueForTextFields() {
+        redTextField.text = string(from: redSlider)
+        greenTextField.text = string(from: greenSlider)
+        blueTextField.text = string(from: blueSlider)
     }
     
     private func coloringView() {
@@ -132,30 +139,28 @@ class SettingsViewController: UIViewController {
     private func getValue(for textField: UITextField) {
         switch textField {
         case redTextField:
-            textField.text = redValueLabel.text
+            textField.text = string(from: redSlider)
         case greenTextField:
-            textField.text = greenValueLabel.text
+            textField.text = string(from: greenSlider)
         default:
-            textField.text = blueValueLabel.text
+            textField.text = string(from: blueSlider)
         }
     }
-    private func getValueForTextFields() {
-        redTextField.text = redValueLabel.text
-        greenTextField.text = greenValueLabel.text
-        blueTextField.text = blueValueLabel.text
-    }
     
-    private func keyboardBarSettings() {
+    private func addingKeyboardBar() {
         toolBar.sizeToFit()
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonPressed))
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+                                        target: nil,
+                                        action: nil)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done,
+                                         target: self,
+                                         action: #selector(doneButtonPressed))
         
-        toolBar.setItems([doneButton], animated: false)
+        toolBar.setItems([flexSpace, doneButton], animated: false)
         
         redTextField.inputAccessoryView = toolBar
         greenTextField.inputAccessoryView = toolBar
         blueTextField.inputAccessoryView = toolBar
-        
-        coloringView()
     }
     
     @objc private func doneButtonPressed() {
@@ -179,24 +184,21 @@ extension SettingsViewController: UITextFieldDelegate {
                 case redTextField:
                     redSlider.setValue(number, animated: true)
                     redValueLabel.text = string(from: redSlider)
-                    getValue(for: textField)
                 case greenTextField:
                     greenSlider.setValue(number, animated: true)
                     greenValueLabel.text = string(from: greenSlider)
-                    getValue(for: textField)
                 default:
                     blueSlider.setValue(number, animated: true)
                     blueValueLabel.text = string(from: blueSlider)
-                    getValue(for: textField)
                 }
                 coloringView()
             } else {
                 showAlert(title: "Oops", massage: "Enter value from 0 to 1")
             }
-        } else {
+        } else if text != "" {
             showAlert(title: "Oops", massage: "Enter numbers of type 0.00")
         }
-        //getValueForTextFields()
+        getValue(for: textField)
     }
 }
 
