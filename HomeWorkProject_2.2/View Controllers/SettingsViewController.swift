@@ -30,16 +30,16 @@ class SettingsViewController: UIViewController {
     var color: UIColor!
     var delegate: SettingsViewControllerDelegate!
     
-    // MARK: - Private properties
-    
-    private let toolBar = UIToolbar()
-    
     // MARK: - Override methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializatingView()
-        addingKeyboardBar()
+        colorView.layer.cornerRadius = colorView.frame.height / 10
+        changingInterfaceProperties(with: color)
+        
+        redTextField.delegate = self
+        greenTextField.delegate = self
+        blueTextField.delegate = self
     }
     
     override func touchesBegan(_ touches: Set<UITouch>,
@@ -72,46 +72,20 @@ class SettingsViewController: UIViewController {
     
     // MARK: - Private methods
     
-    private func initializatingView() {
-        colorView.layer.cornerRadius = colorView.frame.height / 10
-        changingInterfaceProperties(with: color)
-        
-        redTextField.delegate = self
-        greenTextField.delegate = self
-        blueTextField.delegate = self
-    }
-    
     private func changingInterfaceProperties(with color: UIColor) {
-        let colors = gettingColor(for: color)
+        let colors = CIColor(color: color)
         
-        redSlider.value = Float(colors[0])
-        greenSlider.value = Float(colors[1])
-        blueSlider.value = Float(colors[2])
+        redSlider.value = Float(colors.red)
+        greenSlider.value = Float(colors.green)
+        blueSlider.value = Float(colors.blue)
         
-        redValueLabel.text = string(from: colors[0])
-        greenValueLabel.text = string(from: colors[1])
-        blueValueLabel.text = string(from: colors[2])
+        redValueLabel.text = string(from: colors.red)
+        greenValueLabel.text = string(from: colors.green)
+        blueValueLabel.text = string(from: colors.blue)
         
         getValueForTextFields()
         
         coloringView()
-    }
-    
-    private func gettingColor(for color: UIColor) -> [CGFloat] {
-        var colors: [CGFloat] = []
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        
-        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        colors.append(red)
-        colors.append(green)
-        colors.append(blue)
-        colors.append(alpha)
-        
-        return colors
     }
     
     private func getValueForTextFields() {
@@ -147,22 +121,6 @@ class SettingsViewController: UIViewController {
         }
     }
     
-    private func addingKeyboardBar() {
-        toolBar.sizeToFit()
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
-                                        target: nil,
-                                        action: nil)
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done,
-                                         target: self,
-                                         action: #selector(doneButtonPressed))
-        
-        toolBar.setItems([flexSpace, doneButton], animated: false)
-        
-        redTextField.inputAccessoryView = toolBar
-        greenTextField.inputAccessoryView = toolBar
-        blueTextField.inputAccessoryView = toolBar
-    }
-    
     @objc private func doneButtonPressed() {
         view.endEditing(true)
         getValueForTextFields()
@@ -174,6 +132,18 @@ class SettingsViewController: UIViewController {
 extension SettingsViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         textField.text = ""
+        
+        let toolBar = UIToolbar()
+        toolBar.sizeToFit()
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+                                        target: nil,
+                                        action: nil)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done,
+                                         target: self,
+                                         action: #selector(doneButtonPressed))
+        
+        toolBar.setItems([flexSpace, doneButton], animated: false)
+        textField.inputAccessoryView = toolBar
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
